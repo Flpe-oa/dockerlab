@@ -1,4 +1,5 @@
-name: Deploy Frontend
+name: Frontend CI
+
 on:
   push:
     branches:
@@ -7,8 +8,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
-      - run: docker run -e CI=true cygnetops/react-test npm test
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t react-test .
+
+      - name: Run tests
+        run: docker run -e CI=true react-test npm test
+
+
+
+
+
+
+
+
+
+# name: Deploy Frontend
+# on:
+#   push:
+#     branches:
+#       - master
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+#       - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
+#       - run: docker run -e CI=true cygnetops/react-test npm test
