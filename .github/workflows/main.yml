@@ -23,38 +23,7 @@ jobs:
 
       - name: Run tests
         run: docker run -e CI=true react-test npm test
-
-      - name: Debug GitHub OIDC
-        shell: bash
-        run: |
-          response=$(curl -sS \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
-
-          token=$(echo "$response" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')
-
-          TOKEN="$token" python3 - <<'PY'
-          import os
-          import base64
-          import json
-
-          token = os.environ["TOKEN"]
-
-          payload = token.split(".")[1]
-          payload += "=" * (-len(payload) % 4)
-
-          claims = json.loads(base64.urlsafe_b64decode(payload))
-
-          print("aud:", claims.get("aud"))
-          print("sub:", claims.get("sub"))
-          print("repository:", claims.get("repository"))
-          print("repository_id:", claims.get("repository_id"))
-          print("repository_owner:", claims.get("repository_owner"))
-          print("repository_owner_id:", claims.get("repository_owner_id"))
-          print("ref:", claims.get("ref"))
-          PY
-    
-
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -63,6 +32,11 @@ jobs:
 
       - name: Test AWS authentication
         run: aws sts get-caller-identity
+
+
+
+
+
 
       # - name: Deploy to EB
       #   uses: einaregilsson/beanstalk-deploy@v18
@@ -83,17 +57,3 @@ jobs:
 
 
 
-# name: Deploy Frontend
-# on:
-#   push:
-#     branches:
-#       - master
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#       - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-#       - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
-#       - run: docker run -e CI=true cygnetops/react-test npm test
