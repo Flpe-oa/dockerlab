@@ -27,19 +27,19 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::905418491161:role/GitHubActions-Frontend-Deploy
-          aws-region: us-east-1
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Test AWS authentication
         run: aws sts get-caller-identity
 
 
-      - name: Deploy to EB
+      - name: Deploy to Elastic Beanstalk
         uses: aws-actions/aws-elasticbeanstalk-deploy@v1
         with:
-          aws-region: us-east-1
-          application_name: frontend
-          environment_name: Frontend-env
+          aws-region: ${{ vars.AWS_REGION }}
+          application-name: ${{ vars.APPLICATION_NAME }}
+          environment-name: ${{ vars.ENVIRONMENT_NAME }}
 
 
 
