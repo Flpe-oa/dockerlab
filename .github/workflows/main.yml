@@ -6,15 +6,23 @@ on:
       - master
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t react-test -f Dockerfile.dev .
+
+      - name: Run tests
+        run: docker run -e CI=true react-test npm test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -25,67 +33,16 @@ jobs:
       - name: Test AWS authentication
         run: aws sts get-caller-identity
 
-      - name: Build test image
-        run: |
-          docker build \
-            -t frontend-test \
-            -f Dockerfile.dev .
 
-      - name: Run tests
-        run: |
-          docker run \
-            -e CI=true \
-            frontend-test \
-            npm test
-
-
-
-
-# name: Frontend CI
-
-# on:
-#   push:
-#     branches:
-#       - master
-
-# permissions:
-#   id-token: write
-#   contents: read
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-
-#       - name: Checkout
-#         uses: actions/checkout@v4
-
-#       - name: Build Docker image
-#         run: docker build -t react-test -f Dockerfile.dev .
-
-#       - name: Run tests
-#         run: docker run -e CI=true react-test npm test
-
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           role-to-assume: arn:aws:iam::905418491161:role/GitHubActions-Frontend-Deploy
-#           aws-region: us-east-1
-
-#       - name: Test AWS authentication
-#         run: aws sts get-caller-identity
-
-
-#       - name: Deploy to EB
-#         uses: einaregilsson/beanstalk-deploy@v18
-#         with:
-#           provider: elasticbeanstalk
-#           region: us-east-1
-#           application_name: frontend
-#           environment_name: Frontend-env
-#           bucket_name: elasticbeanstalk-us-east-1-905418491161
-#           bucket_path: frontend
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          provider: elasticbeanstalk
+          region: us-east-1
+          application_name: frontend
+          environment_name: Frontend-env
+          bucket_name: elasticbeanstalk-us-east-1-905418491161
+          bucket_path: frontend
 
 
 
