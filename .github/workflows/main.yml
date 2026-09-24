@@ -35,14 +35,12 @@ jobs:
 
 
       - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v18
+        uses: aws-actions/aws-elasticbeanstalk-deploy@v1
         with:
-          provider: elasticbeanstalk
-          region: us-east-1
+          aws-region: us-east-1
           application_name: frontend
           environment_name: Frontend-env
-          bucket_name: elasticbeanstalk-us-east-1-905418491161
-          bucket_path: frontend
+
 
 
 
