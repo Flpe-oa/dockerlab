@@ -1,0 +1,55 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t react-test -f Dockerfile.dev .
+
+      - name: Run tests
+        run: docker run -e CI=true react-test npm test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::905418491161:role/GitHubActions-Frontend-Deploy
+          aws-region: us-east-1
+
+      - name: Test AWS authentication
+        run: aws sts get-caller-identity
+
+
+      - name: Deploy to Elastic Beanstalk
+        uses: aws-actions/aws-elasticbeanstalk-deploy@v1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          application-name: ${{ vars.APPLICATION_NAME }}
+          environment-name: ${{ vars.ENVIRONMENT_NAME }}
+
+
+
+
+
+
+
+
+
+
+
+
+
